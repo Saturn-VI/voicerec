@@ -1,5 +1,6 @@
 import torch
 import torchaudio
+from torchcodec.decoders import AudioDecoder
 from singer_identity import load_model
 from singer_identity.model import IdentityEncoder
 
@@ -14,13 +15,13 @@ if (isinstance(model, IdentityEncoder)):
     # not entirely sure what this does?
     # TODO figure that out
     # https://github.com/SonyCSLParis/ssl-singer-identity/blob/24751d11c6c169adc53be906fd36560df447f974/eval.py#L162
+    print("Setting up model for evaluation...")
     device = next(model.parameters()).device
     model = model.to(device)
     # set model to evaluation mode
     # basically just prevents self-training
     model.eval()
     with torch.no_grad():
-        pass
         # it's business time
         # in the paper's code
         # it gets a batch from a torch dataloader
@@ -55,10 +56,14 @@ if (isinstance(model, IdentityEncoder)):
             # wav = wav[0]
             # wav = wav / torch.max(torch.abs(wav))
 
-        wav, _ = torchaudio.load(audio_path)
+        print("Loading audio from", audio_path)
+        decoder = AudioDecoder(audio_path)
+        wav = decoder.get_all_samples().data
+        print("Audio loaded from", audio_path)
         wav = wav[0]  # assuming mono audio, take the first channel
         wav = wav / torch.max(torch.abs(wav))  # normalize the audio
         wav = wav.to(device)  # move to the same device as the model
+        print("Audio loaded + normalized")
 
         features = model.encoder(model.feature_extractor(wav))
         # not projecting
@@ -66,7 +71,7 @@ if (isinstance(model, IdentityEncoder)):
 
         print("Features extracted successfully")
         print(features.shape)  # print the shape of the features tensor
-        print(features)
+        # print(features)
 
 else:
     print("Bad bad bad")

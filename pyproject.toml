@@ -10,5 +10,6 @@ dependencies = [
     "nnaudio>=0.3.3",
     "torch>=2.8.0",
     "torchaudio>=2.8.0",
+    "torchcodec>=0.6.0",
     "torchvision>=0.23.0",
 ]
