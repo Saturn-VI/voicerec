@@ -1,6 +1,9 @@
 import torch
+import torchaudio
 from singer_identity import load_model
 from singer_identity.model import IdentityEncoder
+
+audio_path = "test.wav"
 
 model = load_model("byol")
 print(model)
@@ -51,6 +54,19 @@ if (isinstance(model, IdentityEncoder)):
             # TODO make this not delete data (average stereo sound?)
             # wav = wav[0]
             # wav = wav / torch.max(torch.abs(wav))
+
+        wav, _ = torchaudio.load(audio_path)
+        wav = wav[0]  # assuming mono audio, take the first channel
+        wav = wav / torch.max(torch.abs(wav))  # normalize the audio
+        wav = wav.to(device)  # move to the same device as the model
+
+        features = model.encoder(model.feature_extractor(wav))
+        # not projecting
+        # features = model.projection(features)
+
+        print("Features extracted successfully")
+        print(features.shape)  # print the shape of the features tensor
+        print(features)
 
 else:
     print("Bad bad bad")
