@@ -47,11 +47,10 @@ if (isinstance(model, IdentityEncoder)):
         # torchaudio.load returns a tensor and a sample rate
         # the paper normalizes the tensor by doing:
             # wav, _ = torchaudio.load(path)
+            # this kills everything except the first channel
+            # TODO make this not delete data (average stereo sound?)
             # wav = wav[0]
-            # it gets the first index to get the mono channel (probably?)
-            # TODO check why it does that
-            # wav = wav / torcha.max(torch.abs(wav))
-            #
+            # wav = wav / torch.max(torch.abs(wav))
 
 else:
     print("Bad bad bad")
