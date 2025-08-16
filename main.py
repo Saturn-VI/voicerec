@@ -1,5 +1,4 @@
 import torch
-import torchaudio
 from torchcodec.decoders import AudioDecoder
 from singer_identity import load_model
 from singer_identity.model import IdentityEncoder
