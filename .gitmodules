@@ -1,0 +1,3 @@
+[submodule "ssl-singer-identity"]
+	path = ssl-singer-identity
+	url = https://github.com/SonyCSLParis/ssl-singer-identity.git
