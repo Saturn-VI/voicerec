@@ -26,16 +26,32 @@ if (isinstance(model, IdentityEncoder)):
         # then the output = self(wavs)
         # it seems like we can also call model(wavs)?
         # okay so the forward function for the similarityevaluator just does
-        # features = model.encoder(model.feature_extractor(wavs))
+            # features = model.encoder(model.feature_extractor(wavs))
 
         # so once we get the wavs, we can just do
-        # features = model.encoder(model.feature_extractor(wavs))
-        # if we were doing projection we would also do features = model.projection(features)
+            # features = model.encoder(model.feature_extractor(wavs))
+        # if we were doing projection we would also do
+            # features = model.projection(features)
 
         # the wavs come from the batch
         # through (wavs, others) = batch
         # then it does wavs = wavs.to(device)
         # so I just need to figure out how the dataloader gets wavs
+
+        # dataloader is a torch dataloader which loads from test datasets
+        # the test datasets are a bunch of EER_Eval_Dataset objects
+        # after the enumerations and batch stuff,
+        # each batch comes from __getitem__() in EER_Eval_Dataset
+        # load comes from torchaudio
+
+        # torchaudio.load returns a tensor and a sample rate
+        # the paper normalizes the tensor by doing:
+            # wav, _ = torchaudio.load(path)
+            # wav = wav[0]
+            # it gets the first index to get the mono channel (probably?)
+            # TODO check why it does that
+            # wav = wav / torcha.max(torch.abs(wav))
+            #
 
 else:
     print("Bad bad bad")
