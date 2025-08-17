@@ -3,6 +3,11 @@ from torchcodec.decoders import AudioDecoder
 from singer_identity import load_model
 from singer_identity.model import IdentityEncoder
 
+# Server implementation notes:
+# chunk the audio into 5 second chunks
+# and then do a 1/n average of the features (similar to https://samwho.dev/reservoir-sampling/)
+# we can then show the user how close they are to their stored embedding
+
 audio_path = "test.wav"
 
 model = load_model("byol")
