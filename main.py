@@ -1,5 +1,6 @@
 import torch
 from torchcodec.decoders import AudioDecoder
+from ml import EmbeddingGenerator
 from singer_identity import load_model
 from singer_identity.model import IdentityEncoder
 
@@ -64,14 +65,10 @@ if (isinstance(model, IdentityEncoder)):
         decoder = AudioDecoder(audio_path)
         wav = decoder.get_all_samples().data
         print("Audio loaded from", audio_path)
-        wav = wav[0]  # assuming mono audio, take the first channel
-        wav = wav / torch.max(torch.abs(wav))  # normalize the audio
-        wav = wav.to(device)  # move to the same device as the model
-        print("Audio loaded + normalized")
 
-        features = model.encoder(model.feature_extractor(wav))
-        # not projecting
-        # features = model.projection(features)
+        EmbeddingGenerator = EmbeddingGenerator(model)
+        print("Generating embedding...")
+        features = EmbeddingGenerator.generate_embedding(wav)
 
         print("Features extracted successfully")
         print(features.shape)  # print the shape of the features tensor
