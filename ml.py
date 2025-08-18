@@ -14,11 +14,17 @@ class EmbeddingGenerator:
         wav = self.normalize_audio(wav)
 
         with torch.no_grad():
-            features = self.model.encoder(self.model.feature_extractor(wav))
+            features: Tensor = self.model.encoder(self.model.feature_extractor(wav))
             if projecting:
-                features = self.model.projection(features)
+                features = self.project_features(features)
 
         return features
+
+    def project_features(self, features: Tensor) -> Tensor:
+        with torch.no_grad():
+            projected_features: Tensor = self.model.projection(features)
+        return projected_features
+
 
     def normalize_audio(self, wav: Tensor) -> Tensor:
         wav = wav[0]  # assuming mono audio, take the first channel
