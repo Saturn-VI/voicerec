@@ -1,5 +1,6 @@
 from torch import Tensor
 import torch
+from torch.nn.modules import Module
 from singer_identity.model import IdentityEncoder
 
 class EmbeddingGenerator:
@@ -21,9 +22,13 @@ class EmbeddingGenerator:
         return features
 
     def project_features(self, features: Tensor) -> Tensor:
-        with torch.no_grad():
-            projected_features: Tensor = self.model.projection(features)
-        return projected_features
+        if (isinstance(self.model.projection, Module)):
+            with torch.no_grad():
+                projected_features: Tensor = self.model.projection(features)
+            return projected_features
+        else:
+            print("Model has no projection layer, returning unprojected features")
+            return features
 
 
     def normalize_audio(self, wav: Tensor) -> Tensor:
