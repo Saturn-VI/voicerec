@@ -2,7 +2,6 @@ import base64
 import binascii
 import io
 import json
-import pickle
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Any
@@ -17,7 +16,9 @@ from litestar import Litestar, Response, get, post
 from litestar.di import Provide
 from litestar.static_files import create_static_files_router
 from litestar.status_codes import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED
+from litestar.middleware.session.server_side import ServerSideSessionConfig
 from litestar.stores.file import FileStore
+from litestar.stores.memory import MemoryStore
 from torch import Tensor
 
 from ml import EmbeddingGenerator
@@ -72,23 +73,14 @@ class User:
             embedding=embedding_tensor
         )
 
-file_store: FileStore
 embedding_generator: EmbeddingGenerator
 
 def embedding_generator_provider() -> EmbeddingGenerator:
     global embedding_generator
     return embedding_generator
 
-def file_store_provider() -> FileStore:
-    global file_store
-    return file_store
-
 async def on_startup() -> None:
-    global file_store
-    path = Path("database")
-    path.mkdir(parents=True, exist_ok=True)
-    file_store = FileStore(path, create_directories=True)
-    await file_store.delete_expired()
+    Path("database").mkdir(parents=True, exist_ok=True)
 
     model = load_model("byol")
     if (isinstance(model, IdentityEncoder)):
@@ -101,13 +93,12 @@ async def on_startup() -> None:
 async def hello() -> str:
     return "Hello, World!"
 
-# create account
 @post("/account/create", status_code=HTTP_201_CREATED)
 async def account_create(data: CredentialData) -> Response[str]:
     if (not data.username or not isinstance(data.username, str)):
         return Response("Invalid username", status_code=HTTP_400_BAD_REQUEST)
 
-    file_store = file_store_provider()
+    file_store = app.stores.get("users")
     if await file_store.exists(data.username):
         return Response("Username already exists", status_code=HTTP_400_BAD_REQUEST)
 
@@ -150,7 +141,7 @@ async def account_login(data: CredentialData) -> Response[str]:
     if not data.username or not isinstance(data.username, str):
         return Response("Invalid username", status_code=HTTP_400_BAD_REQUEST)
 
-    file_store = file_store_provider()
+    file_store = app.stores.get("users")
 
     if not await file_store.exists(data.username):
         return Response("Invalid credentials", status_code=HTTP_400_BAD_REQUEST)
@@ -208,6 +199,8 @@ app = Litestar(
             html_mode=True,
         ),
     ],
-    dependencies={"embedding_generator": Provide(embedding_generator_provider), "file_store": Provide(file_store_provider)},
+    middleware=[ServerSideSessionConfig().middleware],
+    stores={"sessions": MemoryStore(), "users": FileStore(Path("database"), create_directories=True)},
+    dependencies={"embedding_generator": Provide(embedding_generator_provider)},
     on_startup=[on_startup],
 )
