@@ -188,7 +188,7 @@ async def account_login(request: Request, data: CredentialData) -> Response[str]
         resampler = T.Resample(orig_freq=sample_rate, new_freq=44100)
         wav = resampler(wav)
 
-    if cos_sim_provider()(user.embedding, embedding_generator.generate_embedding(wav)).item() < VOICE_SIMILARITY_THRESHOLD:
+    if (await cos_sim_provider())(user.embedding, embedding_generator.generate_embedding(wav)).item() < VOICE_SIMILARITY_THRESHOLD:
         return Response("Invalid credentials", status_code=HTTP_401_UNAUTHORIZED)
 
     if request.session:
