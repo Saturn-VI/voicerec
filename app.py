@@ -26,14 +26,6 @@ from singer_identity.model import IdentityEncoder, load_model
 HTML_DIR = Path("website")
 VOICE_SIMILARITY_THRESHOLD = 0.9
 
-# the general login flow is:
-# client submits credentials + 44 seconds of audio data
-# if correct, the server returns an auth token
-
-# create account flow
-# client submits a username, password, and audio data (should be about 44 seconds)
-# the account is created
-
 @dataclass
 class CredentialData:
     username: str
