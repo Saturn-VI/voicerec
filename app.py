@@ -76,11 +76,11 @@ class User:
 embedding_generator: EmbeddingGenerator
 cos_sim: CosineSimilarity
 
-def embedding_generator_provider() -> EmbeddingGenerator:
+async def embedding_generator_provider() -> EmbeddingGenerator:
     global embedding_generator
     return embedding_generator
 
-def cos_sim_provider() -> CosineSimilarity:
+async def cos_sim_provider() -> CosineSimilarity:
     global cos_sim
     return cos_sim
 
@@ -108,7 +108,7 @@ async def account_create(request: Request, data: CredentialData) -> Response[str
         # user already exists
         return Response("Invalid username: User already exists", status_code=HTTP_400_BAD_REQUEST)
 
-    embedding_generator = embedding_generator_provider()
+    embedding_generator = await embedding_generator_provider()
 
     try:
         webm_bytes = base64.b64decode(data.audio_data)
@@ -119,7 +119,7 @@ async def account_create(request: Request, data: CredentialData) -> Response[str
     webm_stream = io.BytesIO(webm_bytes)
 
     try:
-        wav, sample_rate = torchaudio.load(webm_stream, format="webm")
+        wav, sample_rate = torchaudio.load_with_torchcodec(webm_stream)
     except Exception as e:
         print("Error loading audio data:", e)
         return Response("Invalid audio data", status_code=HTTP_400_BAD_REQUEST)
@@ -167,7 +167,7 @@ async def account_login(request: Request, data: CredentialData) -> Response[str]
     if not bcrypt.checkpw(data.password.encode('utf-8'), user.password):
         return Response("Invalid credentials", status_code=HTTP_401_UNAUTHORIZED)
 
-    embedding_generator = embedding_generator_provider()
+    embedding_generator = await embedding_generator_provider()
 
     try:
         webm_bytes = base64.b64decode(data.audio_data)
@@ -178,7 +178,7 @@ async def account_login(request: Request, data: CredentialData) -> Response[str]
     webm_stream = io.BytesIO(webm_bytes)
 
     try:
-        wav, sample_rate = torchaudio.load(webm_stream, format='webm')
+        wav, sample_rate = torchaudio.load_with_torchcodec(webm_stream)
     except Exception as e:
         print("Error loading audio data:", e)
         return Response("Invalid audio data", status_code=HTTP_400_BAD_REQUEST)
