@@ -1,16 +1,15 @@
 import base64
 import binascii
-import io
 import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Any
+import typing
 
 import bcrypt
 import numpy as np
 import torch
 from torch.nn import CosineSimilarity
-import torchaudio
 import torchaudio.transforms as T
 from litestar import Litestar, Request, Response, get, post
 from litestar.di import Provide
@@ -19,6 +18,7 @@ from litestar.status_codes import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_4
 from litestar.middleware.session.server_side import ServerSideSessionConfig
 from litestar.stores.file import FileStore
 from torch import Tensor
+from torchcodec.decoders import AudioDecoder, AudioStreamMetadata
 
 from ml import EmbeddingGenerator
 from singer_identity.model import IdentityEncoder, load_model
@@ -108,10 +108,11 @@ async def account_create(request: Request, data: CredentialData) -> Response[str
         print("Error decoding base64 audio data:", e)
         return Response("Invalid audio data", status_code=HTTP_400_BAD_REQUEST)
 
-    webm_stream = io.BytesIO(webm_bytes)
-
     try:
-        wav, sample_rate = torchaudio.load_with_torchcodec(webm_stream)
+        audio_decoder = AudioDecoder(source=webm_bytes)
+        samples = audio_decoder.get_all_samples()
+        wav = torch.cat([w.data for w in samples if isinstance(w, Tensor)])
+        sample_rate = typing.cast(AudioStreamMetadata, audio_decoder.metadata).sample_rate or 0
     except Exception as e:
         print("Error loading audio data:", e)
         return Response("Invalid audio data", status_code=HTTP_400_BAD_REQUEST)
@@ -167,10 +168,11 @@ async def account_login(request: Request, data: CredentialData) -> Response[str]
         print("Error decoding base64 audio data:", e)
         return Response("Invalid audio data", status_code=HTTP_400_BAD_REQUEST)
 
-    webm_stream = io.BytesIO(webm_bytes)
-
     try:
-        wav, sample_rate = torchaudio.load_with_torchcodec(webm_stream)
+        audio_decoder = AudioDecoder(source=webm_bytes)
+        samples = audio_decoder.get_all_samples()
+        wav = torch.cat([w.data for w in samples if isinstance(w, Tensor)])
+        sample_rate = typing.cast(AudioStreamMetadata, audio_decoder.metadata).sample_rate or 0
     except Exception as e:
         print("Error loading audio data:", e)
         return Response("Invalid audio data", status_code=HTTP_400_BAD_REQUEST)
