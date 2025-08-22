@@ -8,7 +8,32 @@
     <script src="script.js"></script>
 </head>
 <body>
-    <input type="handle" id="usernameText" placeholder="Type your username...">
-    <input type="password" id="passwordText" placeholder="Type your password...">
-    <button id="startButton">Start Recognition</button>
+    <div class="container">
+        <h1>Voice Recognition Authentication</h1>
+
+        <div class="form-group">
+            <input type="text" id="usernameText" placeholder="Type your username...">
+        </div>
+
+        <div class="form-group">
+            <input type="password" id="passwordText" placeholder="Type your password...">
+        </div>
+
+        <div class="recording-controls">
+            <button id="startButton">Start Recording</button>
+        </div>
+
+        <div class="auth-controls">
+            <button id="loginButton">Login</button>
+        </div>
+
+        <div class="instructions">
+            <p><strong>Instructions:</strong></p>
+            <ol>
+                <li>Enter your username and password</li>
+                <li>Click "Start Recording" and sing for 44 seconds</li>
+                <li>Click "Login" to authenticate or "Create Account" to register</li>
+            </ol>
+        </div>
+    </div>
 </body>

@@ -106,7 +106,7 @@ async def account_create(request: Request, data: CredentialData) -> Response[str
     file_store = app.stores.get("users")
     if await file_store.exists(data.username):
         # user already exists
-        return Response("Invalid username", status_code=HTTP_400_BAD_REQUEST)
+        return Response("Invalid username: User already exists", status_code=HTTP_400_BAD_REQUEST)
 
     embedding_generator = embedding_generator_provider()
 
