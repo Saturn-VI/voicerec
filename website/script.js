@@ -103,6 +103,7 @@ class VoiceRecorder {
     if (this.mediaRecorder && this.isRecording) {
       this.mediaRecorder.stop();
       this.isRecording = false;
+      this.startButton.textContent = "Done recording!"
 
       if (this.stream) {
         this.stream.getTracks().forEach((track) => track.stop());
