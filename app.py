@@ -14,7 +14,7 @@ import torchaudio.transforms as T
 from litestar import Litestar, Request, Response, get, post
 from litestar.di import Provide
 from litestar.static_files import create_static_files_router
-from litestar.status_codes import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_404_NOT_FOUND
+from litestar.status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_404_NOT_FOUND
 from litestar.middleware.session.server_side import ServerSideSessionConfig
 from litestar.stores.file import FileStore
 from torch import Tensor
@@ -132,7 +132,7 @@ async def account_create(request: Request, data: CredentialData) -> Response[str
     user_json = json.dumps(user_data).encode('utf-8')
     await file_store.set(user.username, user_json)
 
-    if request.session:
+    if not request.session:
         request.set_session({"username": user.username})
 
     return Response("Account created successfully", status_code=HTTP_201_CREATED)
@@ -185,16 +185,25 @@ async def account_login(request: Request, data: CredentialData) -> Response[str]
     if (await cos_sim_provider())(user.embedding, embedding_generator.generate_embedding(wav)).item() < VOICE_SIMILARITY_THRESHOLD:
         return Response("Invalid credentials", status_code=HTTP_401_UNAUTHORIZED)
 
-    if request.session:
+    if not request.session:
         request.set_session({"username": user.username})
 
     return Response("Login successful", status_code=200)
+
+@post("/account/logout")
+async def account_logout(request: Request) -> Response[str]:
+    if request.session:
+        request.clear_session()
+        return Response("Logged out successfully", status_code=HTTP_200_OK)
+    else:
+        return Response("No active session", status_code=HTTP_401_UNAUTHORIZED)
 
 app = Litestar(
     route_handlers=[
         hello,
         account_create,
         account_login,
+        account_logout,
         create_static_files_router(
             path="/",
             directories=[HTML_DIR],
