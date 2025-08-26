@@ -103,7 +103,7 @@ class VoiceRecorder {
     if (this.mediaRecorder && this.isRecording) {
       this.mediaRecorder.stop();
       this.isRecording = false;
-      this.startButton.textContent = "Done recording!"
+      this.startButton.textContent = "Done recording!";
 
       if (this.stream) {
         this.stream.getTracks().forEach((track) => track.stop());
@@ -195,13 +195,14 @@ class VoiceRecorder {
         }),
       });
 
-      const responseText = await response.text();
-
       if (response.ok) {
-        alert("Login successful!");
+        // the server should always return json with similarity
+        let similarity = Math.round((await response.json()).similarity * 100);
+        alert(`Login successful! Similarity: ${similarity}%`);
         // Login done
         // litestar middleware automatically sets session cookie
       } else {
+        const responseText = await response.text();
         alert("Login failed: " + responseText);
       }
     } catch (error) {

@@ -24,7 +24,7 @@ from ml import EmbeddingGenerator
 from singer_identity.model import IdentityEncoder, load_model
 
 HTML_DIR = Path("website")
-VOICE_SIMILARITY_THRESHOLD = 0.9
+VOICE_SIMILARITY_THRESHOLD = 0.85
 
 @dataclass
 class CredentialData:
@@ -98,7 +98,7 @@ async def account_create(request: Request, data: CredentialData) -> Response[str
     file_store = app.stores.get("users")
     if await file_store.exists(data.username):
         # user already exists
-        return Response("Invalid username: User already exists", status_code=HTTP_400_BAD_REQUEST)
+        return Response("User already exists", status_code=HTTP_400_BAD_REQUEST)
 
     embedding_generator = await embedding_generator_provider()
 
@@ -118,7 +118,6 @@ async def account_create(request: Request, data: CredentialData) -> Response[str
         return Response("Invalid audio data", status_code=HTTP_400_BAD_REQUEST)
 
     if sample_rate != 44100:
-        print("Sample rate not 44100, resampling")
         resampler = T.Resample(orig_freq=sample_rate, new_freq=44100)
         wav = resampler(wav)
 
@@ -178,17 +177,17 @@ async def account_login(request: Request, data: CredentialData) -> Response[str]
         return Response("Invalid audio data", status_code=HTTP_400_BAD_REQUEST)
 
     if sample_rate != 44100:
-        print("Sample rate not 44100, resampling")
         resampler = T.Resample(orig_freq=sample_rate, new_freq=44100)
         wav = resampler(wav)
 
-    if (await cos_sim_provider())(user.embedding, embedding_generator.generate_embedding(wav)).item() < VOICE_SIMILARITY_THRESHOLD:
+    similarity = (await cos_sim_provider())(user.embedding, embedding_generator.generate_embedding(wav)).item()
+    if similarity < VOICE_SIMILARITY_THRESHOLD:
         return Response("Invalid credentials", status_code=HTTP_401_UNAUTHORIZED)
 
     if not request.session:
         request.set_session({"username": user.username})
 
-    return Response("Login successful", status_code=200)
+    return Response(json.dumps({"similarity": similarity}), status_code=200)
 
 @post("/account/logout")
 async def account_logout(request: Request) -> Response[str]:

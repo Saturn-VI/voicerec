@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "a2wsgi>=1.10.10",
     "bcrypt>=4.3.0",
     "flask>=3.1.1",
     "huggingface-hub>=0.34.4",
