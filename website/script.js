@@ -16,7 +16,6 @@ class VoiceRecorder {
     this.startButton = document.getElementById("startButton");
     this.loginButton = document.getElementById("loginButton");
     this.createAccountButton = document.getElementById("createAccountButton");
-    this.logoutButton = document.getElementById("logoutButton");
     this.usernameInput = document.getElementById("usernameText");
     this.passwordInput = document.getElementById("passwordText");
     this.textBlurb = document.getElementById("textBlurb");
@@ -28,7 +27,6 @@ class VoiceRecorder {
     this.createAccountButton.addEventListener("click", () =>
       this.createAccount(),
     );
-    this.logoutButton.addEventListener("click", () => this.handleLogout());
   }
 
   async startRecording() {
@@ -141,7 +139,7 @@ class VoiceRecorder {
       console.log(
         `Recorded audio blob: ${audioBlob.size} bytes, type: ${audioBlob.type}`,
       );
-      this.textBlurb.textContent = `Recorded ${audioBlob.size} bytes`
+      this.textBlurb.textContent = `Recorded ${audioBlob.size} bytes`;
 
       const base64Audio = await this.blobToBase64(audioBlob);
 
@@ -217,22 +215,6 @@ class VoiceRecorder {
     }
   }
 
-  async handleLogout() {
-    try {
-      const response = await fetch("/account/logout", {
-        method: "POST",
-      });
-      if (!response.ok) {
-        const responseText = await response.text();
-        throw new Error(responseText || "Logout failed");
-      }
-      alert("Logged out!");
-    } catch (error) {
-      console.error("Logout error:", error);
-      alert("Logout error: " + error.message);
-    }
-  }
-
   async createAccount() {
     const username = this.usernameInput.value.trim();
     const password = this.passwordInput.value.trim();
@@ -264,7 +246,7 @@ class VoiceRecorder {
 
       if (response.ok) {
         alert("Account created successfully!");
-        window.location.assign("/account.html")
+        window.location.assign("/account.html");
       } else {
         alert("Account creation failed: " + responseText);
       }

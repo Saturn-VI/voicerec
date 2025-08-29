@@ -197,6 +197,18 @@ async def account_logout(request: Request) -> Response[str]:
     else:
         return Response("No active session", status_code=HTTP_401_UNAUTHORIZED)
 
+@dataclass
+class AccountInfoResponse:
+    username: str = ""
+    isLoggedIn: bool = False
+
+@post("/account/info")
+async def account_info(request: Request) -> Response[AccountInfoResponse]:
+    if request.session and "username" in request.session:
+        return Response(AccountInfoResponse(username=request.session["username"], isLoggedIn=True), status_code=HTTP_200_OK)
+    else:
+        return Response(AccountInfoResponse(), status_code=HTTP_401_UNAUTHORIZED)
+
 app = Litestar(
     route_handlers=[
         hello,

@@ -57,6 +57,14 @@ h1 {
   color: #888;
 }
 
+a {
+    color: #4a9eff;
+}
+
+a:visited {
+    color: #bbb;
+}
+
 .recording-controls,
 .auth-controls {
   margin-top: 1.5rem;
@@ -116,18 +124,25 @@ button {
 }
 
 #textBlurb {
-    align-self: center;
-    size: 0.7rem;
-    color: #ccc;
+  align-self: center;
+  size: 0.7rem;
+  color: #ccc;
 }
 
 .recording-controls {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 button:active {
   transform: translateY(1px);
+}
+
+#account-info {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #ccc;
 }
 
 @media (max-width: 480px) {
