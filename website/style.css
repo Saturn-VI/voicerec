@@ -115,6 +115,17 @@ button {
   background-color: #c82333;
 }
 
+#textBlurb {
+    align-self: center;
+    size: 0.7rem;
+    color: #ccc;
+}
+
+.recording-controls {
+    display: flex;
+    flex-direction: column;
+}
+
 button:active {
   transform: translateY(1px);
 }

@@ -19,6 +19,7 @@ class VoiceRecorder {
     this.logoutButton = document.getElementById("logoutButton");
     this.usernameInput = document.getElementById("usernameText");
     this.passwordInput = document.getElementById("passwordText");
+    this.textBlurb = document.getElementById("textBlurb");
   }
 
   setupEventListeners() {
@@ -140,6 +141,7 @@ class VoiceRecorder {
       console.log(
         `Recorded audio blob: ${audioBlob.size} bytes, type: ${audioBlob.type}`,
       );
+      this.textBlurb.textContent = `Recorded ${audioBlob.size} bytes`
 
       const base64Audio = await this.blobToBase64(audioBlob);
 
@@ -201,6 +203,7 @@ class VoiceRecorder {
         alert(`Login successful! Similarity: ${similarity}%`);
         // Login done
         // litestar middleware automatically sets session cookie
+        window.location.assign("/account.html");
       } else {
         const responseText = await response.text();
         alert("Login failed: " + responseText);
@@ -261,6 +264,7 @@ class VoiceRecorder {
 
       if (response.ok) {
         alert("Account created successfully!");
+        window.location.assign("/account.html")
       } else {
         alert("Account creation failed: " + responseText);
       }
@@ -272,7 +276,7 @@ class VoiceRecorder {
 
   resetUI() {
     this.startButton.disabled = false;
-    this.startButton.textContent = "Start Recognition";
+    this.startButton.textContent = "Start Recording";
 
     if (this.recordingTimer) {
       clearInterval(this.recordingTimer);
